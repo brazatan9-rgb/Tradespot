@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TradeSpot — Buy & Sell Anything</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f4ef;
+    --ink: #0f0e0c;
+    --accent: #e8450a;
+    --accent2: #f0a500;
+    --muted: #9b9488;
+    --border: #e3ddd4;
+    --surface: #ffffff;
+    --green: #1a9c5b;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px 48px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* ── background orbs ── */
+  body::before, body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    width: 500px; height: 500px;
+    top: -120px; right: -140px;
+    background: radial-gradient(circle, rgba(232,69,10,0.09) 0%, transparent 70%);
+    animation: orb1 8s ease-in-out infinite alternate;
+  }
+  body::after {
+    width: 400px; height: 400px;
+    bottom: -80px; left: -100px;
+    background: radial-gradient(circle, rgba(240,165,0,0.08) 0%, transparent 70%);
+    animation: orb2 10s ease-in-out infinite alternate;
+  }
+  @keyframes orb1 { from{transform:translate(0,0) scale(1)} to{transform:translate(-30px,40px) scale(1.1)} }
+  @keyframes orb2 { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,-30px) scale(1.08)} }
+
+  /* ── grid texture ── */
+  .grid-texture {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  /* ── card ── */
+  .card {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0;
+  }
+
+  /* ── logo mark ── */
+  .logo-wrap {
+    margin-bottom: 20px;
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes popIn { from{opacity:0;transform:scale(0.6)} to{opacity:1;transform:scale(1)} }
+
+  .logo-mark {
+    width: 80px; height: 80px;
+    background: var(--ink);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 800;
+    color: var(--bg);
+    letter-spacing: -0.02em;
+    box-shadow: 0 12px 40px rgba(15,14,12,0.18), 0 2px 8px rgba(15,14,12,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  .logo-mark::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(232,69,10,0.25) 0%, transparent 60%);
+    border-radius: inherit;
+  }
+  .logo-mark span { position: relative; z-index: 1; }
+  .logo-mark em { color: var(--accent); font-style: normal; }
+
+  /* ── identity ── */
+  .identity {
+    text-align: center;
+    margin-bottom: 6px;
+    animation: slideUp 0.5s ease 0.1s both;
+  }
+  @keyframes slideUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  .app-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .app-name em { color: var(--accent); font-style: normal; }
+
+  .tagline {
+    font-size: 0.95rem;
+    color: var(--muted);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-bottom: 14px;
+    animation: slideUp 0.5s ease 0.15s both;
+  }
+
+  /* ── live pill ── */
+  .live-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(26,156,91,0.1); border: 1px solid rgba(26,156,91,0.25);
+    border-radius: 30px; padding: 5px 14px;
+    font-size: 0.75rem; font-weight: 700; color: var(--green);
+    letter-spacing: 0.05em; margin-bottom: 28px;
+    animation: slideUp 0.5s ease 0.2s both;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── stats strip ── */
+  .stats {
+    display: flex; gap: 1px;
+    background: var(--border); border-radius: 14px; overflow: hidden;
+    width: 100%; margin-bottom: 24px;
+    animation: slideUp 0.5s ease 0.25s both;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .stat {
+    flex: 1; background: var(--surface); padding: 14px 8px; text-align: center;
+  }
+  .stat-val {
+    font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 800;
+    color: var(--accent);
+  }
+  .stat-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+  /* ── link buttons ── */
+  .links { display: flex; flex-direction: column; gap: 11px; width: 100%; }
+
+  .link-btn {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 20px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600; font-size: 0.95rem;
+    color: var(--ink);
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease, background 0.15s;
+    cursor: pointer;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .link-btn:hover {
+    transform: translateY(-3px) scale(1.01);
+  }
+
+  .link-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+  .link-btn:hover::before { transform: translateX(100%); }
+
+  /* primary CTA */
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(15,14,12,0.2);
+  }
+  .btn-primary:hover { box-shadow: 0 12px 32px rgba(15,14,12,0.28); }
+
+  /* accent */
+  .btn-accent {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(232,69,10,0.28);
+  }
+  .btn-accent:hover { box-shadow: 0 12px 32px rgba(232,69,10,0.38); }
+
+  /* outlined */
+  .btn-outline {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .btn-outline:hover { border-color: var(--ink); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+  /* gold */
+  .btn-gold {
+    background: linear-gradient(135deg, #f0a500, #e8850a);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(240,165,0,0.3);
+  }
+  .btn-gold:hover { box-shadow: 0 12px 32px rgba(240,165,0,0.42); }
+
+  .btn-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+    background: rgba(255,255,255,0.15);
+  }
+  .btn-icon-dark { background: rgba(255,255,255,0.08); }
+  .btn-icon-light { background: rgba(15,14,12,0.07); }
+
+  .btn-text { flex: 1; text-align: left; }
+  .btn-sub { font-size: 0.72rem; opacity: 0.7; font-weight: 400; display: block; margin-top: 1px; }
+  .btn-arrow { font-size: 0.9rem; opacity: 0.6; }
+
+  /* animation stagger */
+  .link-btn:nth-child(1) { animation: slideUp 0.45s ease 0.3s both; }
+  .link-btn:nth-child(2) { animation: slideUp 0.45s ease 0.37s both; }
+  .link-btn:nth-child(3) { animation: slideUp 0.45s ease 0.44s both; }
+  .link-btn:nth-child(4) { animation: slideUp 0.45s ease 0.51s both; }
+  .link-btn:nth-child(5) { animation: slideUp 0.45s ease 0.58s both; }
+  .link-btn:nth-child(6) { animation: slideUp 0.45s ease 0.65s both; }
+
+  /* ── currencies ticker ── */
+  .ticker-wrap {
+    width: 100%; overflow: hidden; margin-bottom: 24px;
+    animation: slideUp 0.5s ease 0.28s both;
+  }
+  .ticker {
+    display: flex; gap: 16px;
+    animation: ticker 18s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .tick-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 20px;
+    font-size: 0.75rem; color: var(--muted); font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  /* ── divider ── */
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; margin: 6px 0 14px;
+    animation: slideUp 0.5s ease 0.55s both;
+  }
+  .divider-line { flex: 1; height: 1px; background: var(--border); }
+  .divider-txt { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+
+  /* ── social row ── */
+  .socials {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 6px;
+    animation: slideUp 0.5s ease 0.7s both;
+  }
+  .social-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--surface); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; cursor: pointer; text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .social-btn:hover { transform: translateY(-4px) scale(1.1); border-color: var(--ink); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+
+  /* ── footer ── */
+  .footer {
+    text-align: center; margin-top: 28px;
+    font-size: 0.72rem; color: var(--muted);
+    animation: slideUp 0.5s ease 0.75s both;
+  }
+  .footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* ── toast ── */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: #fff;
+    padding: 11px 22px; border-radius: 30px;
+    font-size: 0.85rem; font-weight: 600;
+    z-index: 999; pointer-events: none;
+    animation: toastin 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+  }
+  @keyframes toastin { from{opacity:0;transform:translateX(-50%) translateY(10px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+  /* ── featured cat pills ── */
+  .cat-pills {
+    display: flex; gap: 7px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 20px;
+    animation: slideUp 0.5s ease 0.22s both;
+  }
+  .cat-pill {
+    padding: 5px 12px; border-radius: 20px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 0.75rem; font-weight: 500; color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-texture"></div>
+
+<div class="card">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-mark"><span>Trade<em>S</em></span></div>
+  </div>
+
+  <!-- Identity -->
+  <div class="identity">
+    <div class="app-name">Trade<em>Spot</em></div>
+  </div>
+  <div class="tagline">Buy &amp; sell anything, in your currency 🌍</div>
+
+  <!-- Live pill -->
+  <div class="live-pill">
+    <div class="live-dot"></div>
+    Live Now · 12 currencies supported
+  </div>
+
+  <!-- Currency ticker -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker"></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat"><div class="stat-val">12+</div><div class="stat-lbl">Currencies</div></div>
+    <div class="stat"><div class="stat-val">Free</div><div class="stat-lbl">To List</div></div>
+    <div class="stat"><div class="stat-val">🌍</div><div class="stat-lbl">Global</div></div>
+    <div class="stat"><div class="stat-val">Safe</div><div class="stat-lbl">& Secure</div></div>
+  </div>
+
+  <!-- Cat pills -->
+  <div class="cat-pills">
+    <span class="cat-pill">📱 Electronics</span>
+    <span class="cat-pill">👗 Fashion</span>
+    <span class="cat-pill">🚗 Vehicles</span>
+    <span class="cat-pill">🏠 Property</span>
+    <span class="cat-pill">🔧 Services</span>
+    <span class="cat-pill">⚽ Sports</span>
+  </div>
+
+  <!-- Links -->
+  <div class="links">
+
+    <a class="link-btn btn-primary" href="#" onclick="handleClick(event,'app')">
+      <div class="btn-icon btn-icon-dark">🛒</div>
+      <div class="btn-text">
+        Open TradeSpot App
+        <span class="btn-sub">Browse &amp; buy listings now</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <a class="link-btn btn-accent" href="#" onclick="handleClick(event,'sell')">
+      <div class="btn-icon btn-icon-dark">➕</div>
+      <div class="btn-text">
+        Sell Something
+        <span class="btn-sub">List your item for free in 60 seconds</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <a class="link-btn btn-gold" href="#" onclick="handleClick(event,'currencies')">
+      <div class="btn-icon btn-icon-dark">💱</div>
+      <div class="btn-text">
+        Supported Currencies
+        <span class="btn-sub">USD · EUR · NGN · KES · GHS · PGK &amp; more</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <a class="link-btn btn-outline" href="#" onclick="handleClick(event,'howto')">
+      <div class="btn-icon btn-icon-light">📖</div>
+      <div class="btn-text">
+        How It Works
+        <span class="btn-sub">Simple guide to buying &amp; selling</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+    <a class="link-btn btn-outline" href="#" onclick="handleClick(event,'contact')">
+      <div class="btn-icon btn-icon-light">💬</div>
+      <div class="btn-text">
+        Contact / Support
+        <span class="btn-sub">Get help or report an issue</span>
+      </div>
+      <span class="btn-arrow">→</span>
+    </a>
+
+  </div>
+
+  <!-- Divider -->
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-txt">Follow us</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- Socials -->
+  <div class="socials">
+    <a class="social-btn" href="#" onclick="handleClick(event,'twitter')" title="Twitter / X">𝕏</a>
+    <a class="social-btn" href="#" onclick="handleClick(event,'instagram')" title="Instagram">📸</a>
+    <a class="social-btn" href="#" onclick="handleClick(event,'whatsapp')" title="WhatsApp">💬</a>
+    <a class="social-btn" href="#" onclick="handleClick(event,'facebook')" title="Facebook">👥</a>
+    <a class="social-btn" href="#" onclick="handleClick(event,'tiktok')" title="TikTok">🎵</a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    © 2026 TradeSpot &nbsp;·&nbsp; <a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a><br/>
+    <span style="margin-top:4px;display:block">Made with ❤️ for global buyers &amp; sellers</span>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" style="display:none"></div>
+
+<script>
+  // ── currency ticker ──
+  const CURRENCIES = [
+    { flag:"🇺🇸", code:"USD", sym:"$" },
+    { flag:"🇪🇺", code:"EUR", sym:"€" },
+    { flag:"🇬🇧", code:"GBP", sym:"£" },
+    { flag:"🇳🇬", code:"NGN", sym:"₦" },
+    { flag:"🇰🇪", code:"KES", sym:"KSh" },
+    { flag:"🇬🇭", code:"GHS", sym:"₵" },
+    { flag:"🇿🇦", code:"ZAR", sym:"R" },
+    { flag:"🇧🇷", code:"BRL", sym:"R$" },
+    { flag:"🇮🇳", code:"INR", sym:"₹" },
+    { flag:"🇵🇭", code:"PHP", sym:"₱" },
+    { flag:"🇵🇬", code:"PGK", sym:"K" },
+    { flag:"🇯🇵", code:"JPY", sym:"¥" },
+  ];
+
+  const ticker = document.getElementById('ticker');
+  const doubled = [...CURRENCIES, ...CURRENCIES];
+  ticker.innerHTML = doubled.map(c =>
+    `<span class="tick-item">${c.flag} ${c.code} <strong style="color:var(--ink)">${c.sym}</strong></span>`
+  ).join('');
+
+  // ── toast ──
+  const LABELS = {
+    app: "Opening TradeSpot App 🛒",
+    sell: "Let's list your item! ➕",
+    currencies: "12 currencies supported 💱",
+    howto: "How It Works guide 📖",
+    contact: "Opening Support 💬",
+    twitter: "Following on X 𝕏",
+    instagram: "Following on Instagram 📸",
+    whatsapp: "Opening WhatsApp 💬",
+    facebook: "Following on Facebook 👥",
+    tiktok: "Following on TikTok 🎵",
+  };
+
+  let toastTimer;
+  function handleClick(e, key) {
+    e.preventDefault();
+    const toast = document.getElementById('toast');
+    toast.textContent = LABELS[key] || "Coming soon!";
+    toast.style.display = 'block';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 2400);
+  }
+</script>
+</body>
+</html>
